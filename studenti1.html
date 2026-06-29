@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Segnalazione Aggiornamento Matricola</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f7fafc; color: #2d3748; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        h1 { color: #2b6cb0; font-size: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"] { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 4px; box-sizing: border-box; }
+        button { background-color: #3182ce; color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; }
+        .status { margin-top: 15px; padding: 10px; border-radius: 4px; display: none; background-color: #c6f6d5; color: #22543d; font-weight: bold; }
+        .instruction-box { background-color: #ebf8ff; border-left: 4px solid #3182ce; padding: 12px; margin-top: 15px; border-radius: 4px; font-size: 14px; display: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Aggiornamento Matricola</h1>
+    <p>Compila tutti i campi obbligatori per generare il file di aggiornamento e preparare l'invio della mail.</p>
+    
+    <div class="form-group">
+        <label>Nome e Cognome <span style="color: #e53e3e;">*</span>:</label>
+        <input type="text" id="student-name" placeholder="Es. Mario Rossi" required>
+    </div>
+    <div class="form-group">
+        <label>Vecchia Matricola (Esame) <span style="color: #e53e3e;">*</span>:</label>
+        <input type="text" id="old-mat" placeholder="Es. S9154740" required>
+    </div>
+    <div class="form-group">
+        <label>Nuova Matricola Ufficiale <span style="color: #e53e3e;">*</span>:</label>
+        <input type="text" id="new-mat" placeholder="Es. S10000123" required>
+    </div>
+    
+    <button onclick="generateJsonAndEmail()">1. Salva File e Prepara Mail</button>
+    
+    <div id="status-msg" class="status"></div>
+    
+    <div id="instruction-box" class="instruction-box">
+        <strong>⚠️ Cosa fare adesso:</strong><br>
+        Il browser ha scaricato il file <code>.json</code> e ha aperto il tuo programma di posta con la mail precompilata.<br><br>
+        <strong>Ricordati di allegare il file appena scaricato</strong> alla mail prima di premere invio!
+    </div>
+</div>
+
+<script>
+    function generateJsonAndEmail() {
+        let name = document.getElementById('student-name').value.trim();
+        let oldMat = document.getElementById('old-mat').value.trim().toUpperCase();
+        let newMat = document.getElementById('new-mat').value.trim().toUpperCase();
+        
+        if (!name || !oldMat || !newMat) {
+            alert("Tutti i campi sono obbligatori per poter procedere.");
+            return;
+        }
+        
+        let data = {};
+        data[oldMat] = { name: name, newMat: newMat };
+        
+        let blob = new Blob([JSON.stringify(data, null, 2)], {type : 'application/json'});
+        let a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        let fileName = "cambio_matricola_" + oldMat + ".json";
+        a.download = fileName;
+        a.click();
+        
+        document.getElementById('status-msg').innerText = "File " + fileName + " scaricato con successo!";
+        document.getElementById('status-msg').style.display = "block";
+        document.getElementById('instruction-box').style.display = "block";
+        
+        let emailDest = "giorgio.sacchi.unige@gmail.com";
+        let subject = encodeURIComponent("Aggiornamento Matricola - " + name + " (" + oldMat + ")");
+        let body = encodeURIComponent(
+            "Gentile Professore,\n\n" +
+            "Le trasmetto i dati per l'aggiornamento della mia matricola.\n\n" +
+            "Dettagli:\n" +
+            "- Studente: " + name + "\n" +
+            "- Vecchia Matricola utilizzata: " + oldMat + "\n" +
+            "- Nuova Matricola ufficiale: " + newMat + "\n\n" +
+            "[RICORDARSI DI ALLEGARE IL FILE '" + fileName + "' SCARICATO DAL BROWSER]\n\n" +
+            "Cordiali saluti,\n" +
+            name
+        );
+        
+        setTimeout(function() {
+            window.location.href = "mailto:" + emailDest + "?subject=" + subject + "&body=" + body;
+        }, 800);
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Segnalazione Aggiornamento Matricola</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f7fafc; color: #2d3748; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        h1 { color: #2b6cb0; font-size: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"] { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 4px; box-sizing: border-box; }
+        button { background-color: #3182ce; color: white; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; }
+        .status { margin-top: 15px; padding: 10px; border-radius: 4px; display: none; background-color: #c6f6d5; color: #22543d; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Aggiornamento Matricola</h1>
+    <p>Se la matricola dell'esame è diversa da quella ufficiale attuale, compila il modulo e scarica il file da inviare al professore.</p>
+    <div class="form-group">
+        <label>Nome e Cognome (Opzionale):</label>
+        <input type="text" id="student-name" placeholder="Es. Mario Rossi">
+    </div>
+    <div class="form-group">
+        <label>Vecchia Matricola (Esame) *:</label>
+        <input type="text" id="old-mat" placeholder="Es. S9154740" required>
+    </div>
+    <div class="form-group">
+        <label>Nuova Matricola Ufficiale *:</label>
+        <input type="text" id="new-mat" placeholder="Es. S10000123" required>
+    </div>
+    <button onclick="generateJson()">Scarica File di Aggiornamento</button>
+    <div id="status-msg" class="status"></div>
+</div>
+<script>
+    function generateJson() {
+        let name = document.getElementById('student-name').value.trim() || "Anonimo";
+        let oldMat = document.getElementById('old-mat').value.trim().toUpperCase();
+        let newMat = document.getElementById('new-mat').value.trim().toUpperCase();
+        if (!oldMat || !newMat) { alert("I campi con l'asterisco sono obbligatori."); return; }
+        let data = {}; data[oldMat] = { name: name, newMat: newMat };
+        let blob = new Blob([JSON.stringify(data, null, 2)], {type : 'application/json'});
+        let a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+        a.download = "cambio_matricola_" + oldMat + ".json";
+        a.click();
+        document.getElementById('status-msg').innerText = "File scaricato! Invialo al professore.";
+        document.getElementById('status-msg').style.display = "block";
+    }
+</script>
+</body>
+</html>
